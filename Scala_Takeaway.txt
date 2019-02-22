@@ -1,0 +1,1106 @@
+
+Languages designed for the JVM, such as Clojure, Groovy, Java, and Scala.
+Existing languages ported to theJVM, such as JRuby, Jython, and Rhino. With the latest version, Java 8, Java is no longer a privileged JVM language and is now simply one of the many languages that run on the JVM (for a long time it’s been common to run other languages on the JVM, it’s just that Java is now no longer privileged).
+6. Scala scripts do not have an explicit main method. In fact, when you run your script, Scala wraps the entire file into the main method of a class, compiles the code, and calls the generated main method. All you have to do is put valid Scala code in a file.
+eg:scala HelloWorld.scala
+fsc is a separate compiler process that continues to run, waiting for new compilation jobs, even after the compilation process is finished. This results in much faster compilation times, but if you’re on a machine with limited RAM, you might not want to keep the compilation process alive.
+
+2nd Chapter :
+1.Lazy val variables are calculated once, the first time the variable is accessed. Only vals can be lazy variables. You would use a lazy val if the variable may not be used and the cost of calculating it is very long.
+2. Scala supports the ability to automatically convert numbers from one type to another in the order Byte -> Short -> Int -> Long -> Float -> Double.Scala does not allow automatic conversion in the order reverse from mentioned earlier.
+
+The Any, AnyVal, and AnyRef types are the root of Scala’s type hierarchy. All other types descend from AnyVal and AnyRef. The types that extend AnyVal are known as value types. For example, as you will see in numeric types in this section, Double is an ABSTRACT FINAL CLASS that extends AnyVal and the types that extend AnyRef are known as reference types (i.e., nonvalue Scala classes and user-defined) classes.
+3. Null is not a subtype of value types, that is, subtype of AnyVal, null is not a member of any such type.It is not possible to assign null to a variable of type scala.Int. 
+4. val books = Array("Beginning Scala", "Beginning Java", "Beginning Groovy")
+                                                  //> books  : Array[String] = Array(Beginning Scala, Beginning Java, Beginning Gro
+                                                  //| ovy)
+books(1)=""
+books foreach (println(_))                        //> Beginning Scala
+                                                  //| 
+                                                  //| Beginning Groovy
+5. An Empty List Using Nil
+val empty = Nil //It is known as the tail of the list
+6.All exceptions in Scala are unchecked; there is no concept of checked exception.
+
+
+3rd Chapter :
+1.Encapsulation:
+class Shape {
+def area:Double = 0.0
+}
+class Rectangle(val width:Double,val height:Double) extends Shape {
+override def area:Double = width*height
+}
+class Circle(val radius:Double) extends Shape {
+override def area:Double = math.Pi*radius*radius
+}
+One thing to note is that we cannot alter the width and the height of a Rectangle and the radius of the Circle objects because if the field is a val, as the fields width, height, and radius in our code are, Scala generates only a getter method for it. This is a trivial example of encapsulation. In encapsulation, the fields of an object are accessible only through its methods. In other words, one can either mutate or access the state of an object only by invoking its specific methods.
+
+2.Fields are used to store the state of an object and methods may provide access to fields, and alter the state of an object.
+3.class Book(private var title: String) // field title only accessible through method
+if val or var , accessible directly through objectname.fieldname
+if no val or var , not a member of class.
+4.An auxiliary constructor just needs to call one of the previously defined constructors.
+class Book (val title :String, val ISBN: Int) {
+def this(title: String) {
+this(title, 2222)
+}
+def this() {
+this("Beginning Erlang")
+//this.ISBN = 1111
+}
+5. You can pass the type of a parameter or the return type as a parameter.
+def list[T](p:T):List[T] = p :: Nil
+6.You can mix type parameters with variable-length arguments:.
+def mkString[T](as: T*):String = as.foldLeft("")(_ + _.toString)
+7. Overriding:
+Overriding methods in Scala is different than Java. Methods that override declared methods MUST include the override modifier. Methods that override abstract methods MAY include the override modifier
+
+abstract class Base {
+def thing: String
+}
+class One extends Base {
+def thing= "Moof"
+}
+
+class Two extends One{
+override val thing= (new java.util.Date).toString
+}
+class Three extends One{
+override lazy val thing= super.thing + (new java.util.Date).toString
+}
+
+a val can override a def in a superclass 
+8. Call by name :
+def nano() = {
+println("Gettingnano")
+System.nanoTime
+}
+
+def nanoo()=
+{
+"a12333"  
+}
+def delayed(t: => String) = {
+println("Indelayed method")
+println("Param:"+t)
+t
+}
+
+
+delayed(nanoo()) //here in call by name , just sending the function name 
+9.Call by reference :
+def notDelayed(t:Long) = {
+println("Innotdelayed method")
+println("Param:"+t)
+t
+}
+notDelayed(nano()) //here first nano() is calculated and then its passed in to notDelayed()
+
+
+10.Singleton objects:
+ A singleton object definition looks like a class definition, except instead of the keyword class you use the keyword object. A singleton is a class that can have only one instance.
+ Uses:collecting related utility methods, or defining an entry point to a Scala application.
+ 
+11. Companion objects:
+A companion object is an object that’s declared in the same file as a class, and has the same name as the class
+A companion object and its class can access each other’s private members
+A companion object’s apply method lets you create new instances of a class without using the new keyword
+A companion object’s unapply method lets you de-construct an instance of a class into its individual components
+(unapply can return different types)
+
+
+class Person(var name: String, var age: Int)
+
+object Person {
+    def unapply(p: Person): String = s"${p.name}, ${p.age}"
+}
+
+val p = new Person("Lori", 29)
+val result = Person.unapply(p)
+result: String = Lori, 29
+
+12.Extending from a base class in Scala is similar to extending in Java except for two restrictions: method overriding requires the override keyword, and only the primary constructor can pass parameters to the base constructor.
+
+class Vehicle (speed : Int){
+val mph :Int = speed
+    def race() = println("Racing")
+}
+
+class Car (speed : Int) extends Vehicle(speed) {
+override val mph: Int= speed
+override  def race() = println("Racing Car")
+}
+
+12. In Scala, traits can inherit classes. The keyword extends is also used when a class inherits a trait as its parent. The keyword extends is also used even when the class mixes in other traits using the with keyword. Also, extends is used when one trait is the child of another trait or class.
+
+13. Case Classes :
+When the compiler sees the case keyword in front of a class, it generates code for you, with the following benefits:
+
+Case class constructor parameters are public val fields by default, so accessor methods are generated for each parameter.
+An apply method is created in the companion object of the class, so you don’t need to use the new keyword to create a new instance of the class.
+An unapply method is generated, which lets you use case classes in more ways in match expressions.
+A copy method is generated in the class. I never use this in Scala/OOP code, but I use it all the time in Scala/FP.
+equals and hashCode methods are generated, which let you compare objects and easily use them as keys in maps.
+A default toString method is generated, which is helpful for debugging.
+
+4thChapter :
+1.In Java, there is a difference between if and ?:—if is a statement while ?: is an expression. The if clause in Scala is much more like ?: in Java than the if clause in Java.
+2.Pure Fucntion:
+A pure function depends only on (a) its declared input parameters and (b) its algorithm to produce its result.
+ A pure function has no “back doors,” which means:
+Its result can’t depend on reading any hidden value outside of the function scope, such as another field in the same class or global variables.
+It cannot modify any hidden fields outside of the function scope, such as other mutable fields in the same class or global variables.
+It cannot depend on any external I/O. It can’t rely on input from files, databases, web services, UIs, etc; it can’t produce output, such as writing to a file, database, or web service, writing to a screen, etc.
+A pure function does not modify its input parameters.
+
+Signs of impure functions :
+If a function has no input parameters, how can its output depend on its input?
+If a function has no result, it must have side effects: mutating variables, or performing some sort of I/O.
+
+Function Literal/Anonymous Function:
+3.  functions are first-class citizens
+meaning functions can be assigned to variables, functions can be passed to other functions, and functions can be returned as values from other functions. And such functions, which take functions as arguments or return a function, are called higher-order functions.
+
+
+(i: Int) => { i * 2 }
+
+val doubler = (i: Int) => { i * 2 }
+doubler(2)
+In terms of implementation, doubler is a function created using the keyword val and assigned to a variable. To define the doubler as a method instead of as a function you have to define the doubler method in a class, and use the keyword def to define a method.
+
+Returning a function :
+def greeting() = (name: String) => {"hello" + " " + name}
+val greet= greeting()
+greet("Reader")
+4. Partially applied functions :
+
+val add = (x: Int, y: Int) => x + y
+add(1,2)
+res01: Int = 3
+
+val partiallyAdd = add(1, _:Int) //partiallyAdd: Int => Int = <function1>
+
+partiallyAdd(2)
+res02: Int = 3
+The first argument 1 was passed into the original add function and the new function named partiallyAdd was created, which is a partially applied function; then, the second argument 2 was passed into partiallyAdd. When you provide all the parameters, the original function is executed, yielding the result.
+5. Curried function :
+
+Currying is the process of taking a function that accepts N arguments and turning it into a chained series of N functions each taking 1 argument.
+
+function add(a,b,c) 
+{ return a+b+c; 
+}  
+
+
+
+function curriedAdd(a) {  
+   return function(b) {
+     return function(c) {
+       return a+b+c;
+     }
+   }
+}
+curriedFoo(1)(2,3)
+
+6. Tail recursion:
+A recursive function is one that may invoke itself.
+
+One problem associated with using recursive functions is that invoking a recursive function too many times leads to stack-overflow error. The Scala compiler can optimize recursive functions with tail recursion so that recursive calls do not use all the stack space, therefore not running into stack-overflow error
+The tail-recursion is a specific kind of recursion that occurs when a function calls itself as its final operation.
+
+Only functions whose last statement is the recursive invocation can be optimized for tail-recursion by the Scala compiler.
+
+A function marked with the tail-recursion function annotation causes an error at compilation time if it cannot be optimized for tail-recursion. To mark a function to be optimized for tail-recursion, add @annotation.tailrec before the function definition.
+
+7th Chapter :
+1.With single inheritance a class can inherit methods and fields from only one class. Multiple inheritance enables the class to inherit methods and fields from more than one class; however, multiple inheritance can be problematic as the order of inheriting classes may affect the behavior of the subclass inadvertently. The mixin composition is a better approach toward solving the problems of multiple inheritance.
+2.def foo(bar: Baz with Blarg with FruitBat)
+Only instances of classes that extend Baz, Blarg, and FruitBat may be passed into this method.
+val archer = new Dog("archer") with Athlete with Runner with Male
+Please note that we can combine different traits as part of the object creation
+3. trait Runner {
+  this: Athlete with HasLegs =>
+  def run() {println("I'm running")}
+}
+
+trait Athlete extends Animal.
+
+class Dog(val name: String) extends Mammal with HasLegs with KnowsName {
+  def bodyTemperature: Double = 99.3
+}
+
+
+class Person(val name: String) extends Mammal with
+  HasLegs with KnowsName {
+  def bodyTemperature: Double = 98.6
+}
+
+trait Biker extends Person {
+  this: Athlete=>
+  def ride() {println("I'm riding my bike")}
+}
+
+trait Gender
+trait Male extends Gender
+trait Female extends Gender
+
+ val bikerDog = new Dog("biker") with Athlete with Biker
+ 
+ val archer = new Dog("archer") with Athlete with Runner with Male
+ 
+ val annette = new Person("Annette") with Athlete with Runner with Female
+ 
+ 
+ val dpp = new Person("David") with Athlete with Biker with Male
+ 
+ def goBiking(b: Biker) = println(b.name+" is biking")
+ 
+ goBiking(dpp)
+ 
+ goBiking(annette) //error
+ 
+ def charityRun(r: Person with Runner) = r.run()
+ charityRun(annette)
+ 
+ charityRun(archer) //error
+ 
+ 8th Chapter :
+1. The two fundamental design considerations of a programming language are static versus dynamic typing and strong versus weak typing. 
+In static typing, a variable is bound to a particular type. In dynamic typing, the type is bound to the value instead of the variable. Scala and Java are statically typed languages, whereas JavaScript, Python, Groovy, and Ruby, are dynamically typed languages.
+2. AnyRef corresponds to java.lang.Object, and is the supertype of all objects. AnyVal on the other hand represents the value such as int and other JVM primitives. Because of this hierarchy, it becomes possible to define methods that take Any, thus being compatible with both scala.Int instances as well as java.lang.String .
+
+def test(int: AnyVal) = ()
+test(5)
+test(5.12)
+test(new Object) //error
+
+3.Types in Scala are used to define classes, abstract classes, traits, objects, and functions. 
+
+4.Variance defines inheritance relationships of parameterized types, which brings to light whether a Set[String], for example, is a subtype of Set[AnyRef]. A declaration like class Set[+A] means that Set is parameterized by a type A. The + is called a variance annotation.
+
+Variance comes in three flavors: invariant, covariant, and contravariant => default invariant.
+
+Covariance:If S extends T then Class[S] extends Class[T].
+
+Contravariance: If S extends T then Class[T] extends Class[S].
+
+eg Covariance :
+
+class Putable[+T] {
+def put(in: T) {println("Putting "+in)}
+}
+
+
+object Demo extends App {
+
+def writeOnly(in: Putable[Any]) {in.put("Hello")}
+ val p = new Putable[Int]
+ writeOnly(p)
+}
+
+
+
+eg Contravariance :
+class Putable[-T] {
+def put(in: T) {println("Putting "+in)}
+}
+
+
+object Demo extends App {
+
+def writeOnly(in: Putable[String]) {in.put("Hello")}
+ val p = new Putable[Any]
+ writeOnly(p)
+}
+
+
+
+Invariance :
+for anything that’s mutable, the type parameter should be invariant
+
+rules:
+Mutable containers should be invariant.
+Immutable containers should be covariant.
+Inputs to transformations should be contravariant, and outputs from transformations should be covariant.
+
+5. The type parameter A <: AnyRef means that the type to the left of the <: operator must be derived from the type to the right of the <: operator or the type to the left of the <: operator could be the same type of the right of the <: operator
+example :
+
+class Employee (val name: String)
+class Internal (name: String) extends Employee(name)
+class FreeLancer(name: String) extends Employee(name)
+class Customer (name: String)
+
+
+def employeeName [A <: Employee](emp: A) { println(emp.name) }
+
+employeeName (new Internal ("Paul")) //will work
+
+employeeName (new Customer ("Peter"))//will not work
+6. What is the scope of implicits? The Scala compiler considers an implicit in the current scope if:
+
+The implicit is defined in the current class or in a superclass.
+The implicit is defined in a trait or supertrait, or is mixed into the current class or a superclass.
+The implicit is defined on the companion object of the current target class.
+The implicit is available on an object that has been imported into the current scope.
+Rules:
+They must be defined inside of another trait/class/object.
+object Helpers {
+implicit class RichInt(x: Int) // OK!
+}
+implicit class RichDouble(x: Double) // BAD!
+They may only take one non-implicit argument in their constructor.
+implicit class RichDate(date: java.util.Date) // OK!
+implicit class Indexer[T](collecton: Seq[T], index: Int) // BAD!
+implicit class Indexer[T](collecton: Seq[T])(implicit index: Index) // OK!
+
+7. Abstract Types:
+trait Container {
+  type A
+  def value: A
+}
+
+9th Chapter:
+1. Exceptions :
+for java callers of scala method : add @throws annotation before method definition and wrap the call within try catch block
+class SomeClass {
+@throws(classOf[Exception])
+def aScalaMethod {
+throw new Exception("Exception")
+}
+}
+2.Java Static Members and Scala Objects
+There is no such thing as static in Scala. In Java, the static does not belong to an object, can’t be inherited, and doesn’t participate in polymorphism, thus statics aren’t object-oriented. 
+Scala objects give you extra advantage in that Scala objects can also extend interfaces and traits.
+
+The companion object enables storing of static methods and from this, you have full access to the classes’ members, including private ones. Scala allows you to declare both an object and a class of the same name, placing the static members in the object and the instance members in the class.
+
+3.Java Interfaces and Scala Traits
+A Java class can’t extend a Scala trait that has implemented methods.
+example :
+
+trait Computation {
+def add(a: Int, b: Int) = a + b
+}
+
+public class DoTheMath{
+public static void main(String[] args) {
+DoTheMath d = new DoTheMath();
+// do the math here
+}
+}
+
+The type Computation cannot be the superclass of Java class DoTheMath simply because a superclass in Java must be a class; that is, Java class DoTheMath cannot use the extend keyword to extend Computation
+
+To be able to use the implemented method add of a Scala trait Computation from Java class DoTheMath, you must wrap the trait Computation in a Scala class
+
+class JavaInteroperableComputation extends Computation
+
+public class DoTheMath extends JavaInteroperableComputation{
+public static void main(String[] args) {
+DoTheMath d = new DoTheMath();
+d.add(3,1);
+}
+}
+
+4.JavaBeans Specification Compliant Scala Classes
+
+To ensure compatibility with Java frameworks, you may need Java-style getters and setters on the fields of your class to interact with a Java class or library that accepts only classes that conform to the JavaBean specification. 
+for this:
+
+import scala.beans.BeanProperty
+class Book(@BeanProperty var isbn:Int, @BeanProperty var title:String)
+
+using this , getter and setter methods are generated
+
+11thChapter:
+
+1.
+
+
+
+Understanding Parametricity in Scala:
+def f[A](a: A, b: String): String = "hi"
+a and b are value parameters, the one you use most of the time.
+
+A is a type parameter, the caller will decide what it is when he calls the function:
+
+Writing pure scala code depending upon functional requirements, for developing characteristics .
+
+Writing spark job (written in scala) .
+
+Perform scala-unit, regression, pre-prod testing for different project component.  
+
+Loading datasets (monthly/weekly/daily/as available) into HBase which is used for further processing. 
+
+Creating hive table on different datasets and project modules output.
+
+Writing shell scripts which are responsible to get/ put the data, running the spark jobs and hive table creation.
+
+Create dataload jobs: using ->  Pentaho jobs – for compressed mainframe data load into Hadoop cluster and spark jobs for ascii data.        
+
+Schedule the jobs using SOS Berlin job scheduler.
+
+
+
+in case of conflicts:
+git checkout feature branch
+git pull origin develop
+then resolve conflicts in case auto resolving of conflicts fails
+then add and commit the conflicts resolution changes
+
+============================================================
+
+println()
+Defined in predef object internally calls Console.println(x:Any)
+if println(null) -> output will be "null"
+
+Traits in scala :
+
+Why they are used ?
+One major use of traits is to automatically add methods to a class in terms of methods the class already has.  
+That is, traits can enrich a thin interface, making it into a rich interface.
+
+To enrich an interface using traits, 
+simply define a trait :->
+with a small number of abstract methods—the thin part of the trait's interface—
+and a potentially large number of concrete methods, all implemented in terms of the abstract methods.
+
+Stackable modifications :
+the trait has a super call on amethod declared abstract.  
+Such calls are illegal for normal classes because they will certainly fail at run time.  
+For a trait, however,such a call can actually succeed.  
+Since super calls in a trait aredynamically bound, 
+the super call in trait Doubling will work solong as the trait is mixed in after another trait 
+or class that gives a concrete definition to the method.
+
+eg:
+
+abstract class IntQueue {
+      def get(): Int
+      def put(x: Int)
+    }
+	
+	
+import scala.collection.mutable.ArrayBuffer
+  
+    class BasicIntQueue extends IntQueue {
+      private val buf = new ArrayBuffer[Int]
+      def get() = buf.remove(0)
+      def put(x: Int) = { buf += x }
+    }
+
+
+trait Doubling extends IntQueue {
+      abstract override def put(x: Int) = { super.put(2 * x) }
+    }
+This declaration means that the trait can only be mixed into a class that also extends IntQueue
+
+The order of mixins is significant 
+
+When you call a method on a class with mixins, the method in the trait furthest to the right is called first. 
+If that method calls super, it invokes the method in the next trait to its left, and so on	
+	
+	
+Difference between linearization and multiple inheritance :
+
+When you instantiate a class with new, Scala takes the class, and all of its inherited classes and traits, 
+and puts them in a single, linear order. Then, whenever you call super inside one of those classes, 
+the invoked method is the next one up the chain. If all of the methods but the last call super, 
+the net result is stackable behavior.
+
+// In file launch.scala   
+ package launch {      
+		class Booster3   
+				}     
+ // In file bobsrockets.scala   
+ package bobsrockets {     
+	package navigation {        
+			package launch {         
+				class Booster1        
+						   }   
+ 
+			class MissionControl {        
+                  val booster1 = new launch.Booster1     
+                  val booster2 = new bobsrockets.launch.Booster2   
+                  val booster3 = new _root_.launch.Booster3       
+								  }  
+						}    
+	package launch { 
+		class Booster2    
+					}   
+ }
+ 
+
+every top-level package you can write is treated as a member of package _root_.
+ For example, both launch and bobsrockets of Listing 13.6 are members of package _root_. 
+ As a result, _root_.launch gives you the top-level launch package, and_root_.launch.Booster3 designates the outermost booster class 
+
+Scala imports :
+
+• may appear anywhere 
+• may refer to objects (singleton or regular) in addition to packages 
+• let you rename and hide some of the imported members 
+
+
+
+
+
+import Fruits.{Pear => _, _}
+This imports all members of Fruits except Pear. 
+A clause of the form "<original-name> => _" excludes <original-name> from the names that are imported. 
+
+In summary, an import selector can consist of the following: 
+• A simple name x. This includes x in the set of imported names. 
+• A renaming clause x => y. This makes the member named x visible under the name y. 
+• A hiding clause x => _. This excludes x from the set of imported names. 
+• A catch-all `_'. This imports all members except those members mentioned in a preceding clause. 
+If a catch-all is given, it must come last in the list of import selectors. 
+The simpler import clauses shown at the beginning of this section can be seen as special abbreviations of import clauses with a selector clause. 
+For example, "import p._" is equivalent to "import p.{_}" and "import p.n" is equivalent to "import p.{n}".
+
+
+3 	implicit imports in each .scala file :
+ import java.lang._ // everything in the java.lang package  
+ import scala._     // everything in the scala package  
+ import Predef._    // everything in the Predef object
+
+
+Access to protected members in Scala is also a bit more restrictive than in Java. 
+In Scala, aprotected member is only accessible from subclasses of the class in which the member is defined.
+ In Java such accesses are also possible from other classes in the same package
+
+
+Access modifiers in Scala can be augmented with qualifiers.
+ A modifier of the form private[X]or protected[X] means that access is private or protected "up to" X, 
+ where X designates some enclosing package, class or singleton object. 
+
+ Scala also has an access modifier that is even more restrictive than private. 
+ A definition labeled private[this] is accessible only from within the same object that contains the definition.
+ Such a definition is called object-private
+
+Marking a member private[this] is a guarantee that it will not be seen from other objects of the same class. 
+
+In the following example, the method doFoo takes an instance of a Foo object, but because the isFoo method is declared as an object-private method, the code won’t compile:
+
+class Foo {
+    private[this] def isFoo = true
+    def doFoo(other: Foo) {
+        if (other.isFoo) {  // this line won't compile
+            // ...
+        }
+    }
+}
+The code won’t compile because the current Foo instance can’t access the isFoo method of the other instance,
+ because isFoo is declared as private[this]. 
+ As you can see, the object-private scope is extremely restrictive.
+
+Sealed classes :
+
+why ?
+
+Whenever you write a pattern match, you need to make sure you have covered all of the possible cases. 
+Sometimes you can do this by adding a default case at the end of the match, 
+but that only applies if there is a sensible default behavior. 
+What do you do if there is no default? How can you ever feel safe that you covered all the cases? 
+
+how ?
+
+Is to make the superclass of your case classes sealed. 
+A sealed class cannot have any new subclasses added except the ones in the same file. 
+
+This is very useful for pattern matching because it means you only need to worry about the subclasses you already know about. 
+What's more, you get better compiler support as well. 
+If you match against case classes that inherit from a sealed class, 
+the compiler will flag missing combinations of patterns with a warning message. 
+
+For instance, you might know from the context that you will only ever apply the describe method above to expressions that are either Numbers or Vars, so you know that no MatchError will be produced. To make the warning go away, you could add a third catch-all case to the method, like this:
+  def describe(e: Expr): String = e match {    
+  case Number(_) => "a number"    
+  case Var(_) => "a variable"    
+  case _ => throw new RuntimeException // Should not happen  
+  }
+That works, but it is not ideal. 
+You will probably not be very happy that you were forced to add code that will never be executed (or so you think), 
+just to make the compiler shut up.
+ A more lightweight alternative is to add an @unchecked annotation to the selector expression of the match. 
+ This is done as follows:
+  def describe(e: Expr): String = (e: @unchecked) match {  
+  case Number(_) => "a number"   
+  case Var(_)    => "a variable"  
+  }
+In general, you can add an annotation to an expression in the same way you add a type: 
+follow the expression with a colon and the name of the annotation (preceded by an at sign). 
+For example, in this case you add an @uncheckedannotation to the variable e, with "e: @unchecked". 
+The @unchecked annotation has a special meaning for pattern matching.
+If a match's selector expression carries this annotation, exhaustivity checking for the patterns that follow will be suppressed.
+
+Partial function in pattern matching :
+
+  val withDefault: Option[Int] => Int = {
+  case Some(x) => x    
+  case None => 0  
+  }
+ a sequence of cases gives you a partial function. 
+ If you apply such a function on a value it does not support, 
+ it will generate a run-time exception. 
+ For example, here is a partial function that returns the second element of a list of integers:
+  val second: List[Int] => Int = {    
+  case x :: y :: _ => y 
+  }
+  
+warning  : 
+ <console>:17: warning: match is not exhaustive!  missing combination            Nil
+ 
+ 
+If you want to check whether a partial function is defined, 
+you must first tell the compiler that you know you are working with partial functions. 
+The type List[Int] => Int includes all functions from lists of integers to integers, 
+whether or not the functions are partial.
+ The type that only includes partial functions from lists of integers to integers is writtenPartialFunction[List[Int],Int].
+ Here is the second function again, this time written with a partial function type:
+ 
+  val second: PartialFunction[List[Int],Int] = { 
+  case x :: y :: _ => y  }
+  
+
+Partial functions have a method isDefinedAt, which can be used to test whether the function is defined at a particular value. 
+In this case, the function is defined for any list that has at least two elements:
+  scala> second.isDefinedAt(List(5,6,7))  res30: Boolean = true    
+  scala> second.isDefinedAt(List())  res31: Boolean = false  
+  
+Lists :
+
+Lists are quite similar to arrays, but there are two important differences. 
+First, lists are immutable. That is, elements of a list cannot be changed by assignment. 
+Second, lists have a recursive structure (i.e., a linked list),[1] whereas arrays are flat.
+
+
+ it's not a good idea to replace a test such as xs.isEmpty by xs.length == 0.
+ The result of the two tests is equivalent,
+ but the second one is slower, in particular if the list xs is long.
+  
+
+Unlike head and tail, which both run in constant time,
+ init and last need to traverse the whole list to compute their result. 
+ As a result, they take time proportional to the length of the list.
+  
+Random element selection is supported through the apply method; 
+however it is a less common operation for lists than it is for arrays.
+
+mkString :
+If you want a different representation you can use the mkString method. 
+The operationxs mkString (pre, sep, post) involves four operands: 
+the list xs to be displayed, 
+a prefix string preto be displayed in front of all elements, 
+a separator string sep to be displayed between successive elements, 
+and a postfix string post to be displayed at the end. 
+The result of the operation is the string: 
+pre + xs(0) + sep + ...+ sep + xs(xs.length - 1) + post 
+
+The find method is also similar to filter, 
+but it returns the first element satisfying a given predicate, 
+rather than all such elements.
+
+ List(1, 2, 3, 4, 5) find (_ % 2 == 0)  res43: Option[Int] = Some(2) 
+ 
+Scala's type inference algorithm:
+
+
+One difference between the previous uses of sortWith and msort concerns the admissible syntactic forms of the comparison function. 
+
+Compare:
+
+  scala> msort((x: Char, y: Char) => x > y)(abcde)  
+  res66: List[Char] = List(e, d, c, b, a)
+with:
+
+  scala> abcde sortWith (_ > _)  
+  res67: List[Char] = List(e, d, c, b, a)
+  
+  
+The two expressions are equivalent, 
+but the first uses a longer form of comparison function with named parameters and explicit types. 
+The second uses the concise form, (_ > _), where named parameters are replaced by underscores.
+ Of course, you could also use the first, longer form of comparison with sortWith. 
+ However, the short form cannot be used with msort.
+ 
+ 
+  scala> msort(_ > _)(abcde)  
+  <console>:12: error: missing parameter type for expanded   
+  function ((x$1, x$2) => x$1.$greater(x$2))         
+  msort(_ > _)(abcde)
+  
+ the second case, msort(_ > _)(abcde). 
+ The type of msort is a curried, 
+ polymorphic method type that takes an argument of type (T, T) => Boolean to a function from List[T] toList[T] 
+ where T is some as-yet unknown type. 
+ The msort method needs to be instantiated with a type parameter before it can be applied to its arguments.   
+ 
+One way to resolve the problem is to pass an explicit type parameter to msort, as in:
+  scala> msort[Char](_ > _)(abcde)  
+  res68: List[Char] = List(e, d, c, b, a)
+
+ Another possible solution is to rewrite the msort method so that its parameters are swapped:
+  def msortSwapped[T](xs: List[T])(less:      
+  (T, T) => Boolean): List[T] = {      
+  // same implementation as msort,    
+  // but with arguments swapped  
+  }
+Now type inference would succeed:
+  scala> msortSwapped(abcde)(_ > _)  
+  res69: List[Char] = List(e, d, c, b, a)
+
+Conclusion:
+When designing a polymorphic method that takes some non-function arguments and a function argument, 
+place the function argument last in a curried parameter list on its own. 
+That way, the method's correct instance type can be inferred from the non-function arguments, 
+and that type can in turn be used to type check the function argument. 
+The net effect is that users of the method will be able to give less type information 
+and write function literals in more compact ways.
+
+Scala collections brief overview :
+
+Lists:
+ Lists support fast addition and removal of items to the beginning of the list, 
+ but they do not provide fast access to arbitrary indexes because the implementation must iterate through the list linearly.
+
+ The fast addition and removal of initial elements means that pattern matching works well, 
+
+Listbuffer:
+Class List provides fast access to the head of the list, but not the end. 
+Thus, when you need to build a list by appending to the end, 
+consider building the list backwards by prepending elements to the front. 
+Then when you're done, call reverse to get the elements in the order you need. 
+Another alternative, which avoids the reverse operation, is to use a ListBuffer. 
+A ListBuffer is a mutable object (contained in package scala.collection.mutable), 
+which can help you build lists more efficiently when you need to append. 
+ListBuffer provides constant time append and prepend operations.
+
+Sets and Maps:
+
+Default immutable set 
+implementations    Number of elements Implementation 
+0 				   scala.collection.immutable.EmptySet 
+1                  scala.collection.immutable.Set1 
+2                  scala.collection.immutable.Set2 
+3                  scala.collection.immutable.Set3 
+4                  scala.collection.immutable.Set4 
+5                  or more scala.collection.immutable.HashSet 
+
+Default immutable map 
+implementations Number of elements Implementation 
+0               scala.collection.immutable.EmptyMap 
+1               scala.collection.immutable.Map1 
+2               scala.collection.immutable.Map2 
+3               scala.collection.immutable.Map3 
+4               scala.collection.immutable.Map4
+5               or more scala.collection.immutable.HashMap 
+
+ var celsius: Float = _ 
+
+The celsius variable is initially set to a default value by specifying `_' as the "initializing value" of the variable. 
+More precisely, an initializer "= _" of a field assigns a zero value to that field. 
+The zero value depends on the field's type. It is 0 for numeric types, false for booleans, and null for reference types. 
+This is the same as if the same variable was defined in Java without an initializer.
+
+Abstract members :
+trait Abstract {    
+type T    
+def transform(x: T): T    
+val initial: T    
+var current: T  
+}
+
+Concrete implementation:
+
+class Concrete extends Abstract {    
+type T = String    
+def transform(x: String) = x + x    
+val initial = "hi"    
+var current = initial  
+}
+
+why abstract types used ?
+ is to define a short, descriptive alias for a type whose real name is more verbose, 
+ or less obvious in meaning, than the alias. 
+ Such type members can help clarify the code of a class or trait. 
+ The other main use of type members is to declare abstract types that must be defined in subclasses
+
+
+trait RationalTrait {     
+val numerArg: Int     
+val denomArg: Int    
+}
+
+ To instantiate a concrete instance of that trait, 
+ you need to implement the abstract val definitions. 
+ 
+  new RationalTrait {    
+  val numerArg = 1    
+  val denomArg = 2 
+  }
+Here the keyword new appears in front of a trait name, RationalTrait, 
+which is followed by a class body in curly braces. 
+This expression yields an instance of an anonymous class that mixes in the trait and is defined by the body.
+
+there's some difference 
+
+ new RationalTrait {    
+ val numerArg = expr1    
+ val denomArg = expr2  
+ }
+the expressions, expr1 and expr2, are evaluated as part of the initialization of the anonymous class, 
+but the anonymous class is initialized after the RationalTrait. 
+So the values of numerArgand denomArg are not available during the initialization of RationalTrait 
+(more precisely, a selection of either value would yield the default value for type Int, 0).
+
+However, it becomes a problem in the variant ofRationalTrait shown in Listing 20.4, 
+which defines normalized numerators and denominators.
+
+    trait RationalTrait {       
+	val numerArg: Int       
+	val denomArg: Int       
+	require(denomArg != 0)      
+	private val g = gcd(numerArg, denomArg)
+      val numer = numerArg / g      
+	  val denom = denomArg / g      
+	  private def gcd(a: Int, b: Int): Int =         
+		if (b == 0) a else gcd(b, a % b)      
+	override def toString = numer + "/" + denom    
+	}
+
+ new RationalTrait {           
+ val numerArg = 1 * x           
+ val denomArg = 2 * x         
+ }  
+ 
+ java.lang.IllegalArgumentException: requirement failed    
+ at scala.Predef$.require(Predef.scala:207)    
+ at RationalTrait$class.$init$(<console>:10)    
+ ... 28 elided
+The exception in this example was thrown because denomArg still had its default value of 0 
+when class RationalTrait was initialized, which caused the require invocation to fail.
+
+The first solution, pre-initialized fields, lets you initialize a field of a subclass before the superclass is called
+=>  simply place the field definition in braces before the superclass constructor call. 
+
+ new {              
+ val numerArg = 1 * x             
+ val denomArg = 2 * x            
+ } 
+ with RationalTrait
+
+Second solution : 
+Lazy vals :
+
+ object Demo {           
+val x = { println("initializing x"); 
+"done" }         
+}  
+ 
+ scala> Demo 
+ initializing x  
+ res3: Demo.type = Demo$@2129a843  
+
+ object Demo {           
+ lazy val x = { 
+ println("initializing x"); 
+ "done" }         
+ } 
+
+
+  scala> Demo.x  
+  initializing x  
+  res6: String = don
+
+
+
+Abstract vars :
+
+ trait AbstractTime {      
+ var hour: Int      
+ var minute: Int    
+ }
+ 
+If you declare an abstract var named hour, for example, 
+you implicitly declare an abstract getter method, hour, and an abstract setter method, hour_=. 
+There's no reassignable field to be defined—that will come in subclasses that define the concrete implementation of the abstract var. 
+For instance, the definition of AbstractTime shown inListing 20.2 is exactly equivalent to the definition shown in Listing 20.3.
+    trait AbstractTime {      
+	def hour: Int          // getter for `hour'      
+	def hour_=(x: Int)     // setter for `hour'      
+	def minute: Int        // getter for `minute'      
+	def minute_=(x: Int)   // setter for `minute'    
+	}
+ 
+
+Enumerations:
+
+To create a new enumeration, you define an object that extends this class, 
+as in the following example, 
+which defines a new enumeration of Colors:
+
+  object Color extends Enumeration {    
+  val Red = Value    
+  val Green = Value    
+  val Blue = Value  
+  }
+
+a value such as Color.Red is of type Color.Value; 
+Color.Value is the type of all enumeration values defined in object Color. 
+It's a pathdependent type, with Color being the path and Value being the dependent type  
+
+, if you define another enumeration, such as:
+  object Direction extends Enumeration {    val North, East, South, West = Value  }
+then Direction.Value would be different from Color.Value because the path parts of the two types differ.
+
+Scala's Enumeration class also offers many other features found in the enumeration designs of other languages. 
+You can associate names with enumeration values by using a different overloaded variant of the Value method:
+
+  object Direction extends Enumeration {    
+  val North = Value("North")    
+  val East = Value("East")    
+  val South = Value("South")    
+  val West = Value("West")  
+  }
+You can iterate over the values of an enumeration via the set returned by the enumeration's values method:
+  scala> for (d <- Direction.values) 
+  print(d + " ")  
+  =>North East South West 
+  
+Implicits :
+what ?
+are those that the compiler is allowed to insert into a program in order to fix any of its type errors
+You can use it to mark any variable, function, or object definition
+
+rules:
+ the implicit conversion must be in scope as a single identifier. 
+The compiler will also look for implicit definitions in the companion object of the source or expected target types of the conversion. 
+
+Implicit conversion to an expected type is the first place the compiler will use implicits. 
+
+val i: Int = 3.5
+error 
+
+implicit def doubleToInt(x: Double) = x.toInt 
+
+ val i: Int = 3.5
+no error 
+
+Implicit conversions also apply to the receiver of a method call, the object on which the method is invoked.
+why?
+First, receiver conversions allow smoother integration of a new class into an existing class hierarchy. 
+And second, they support writing domain-specific languages (DSLs) within the language.
+
+class Rational(n: Int, d: Int) {    
+...    
+def + (that: Rational): Rational = 
+...    
+def + (that: Int): Rational = 
+...  
+}
+
+val oneHalf = new Rational(1, 2) 
+oneHalf + oneHalf  
+res0: Rational = 1/1 
+
+but 
+1 + oneHalf
+error 
+
+so :
+implicit def intToRational(x: Int) =            
+new Rational(x, 1) 
+
+1 + oneHalf  
+res2: Rational = 3/2
+
+Whenever you see someone calling methods that appear not to exist in the receiver class, 
+they are probably using implicits.
+
+Implicit classes:
+
+An implicit class is a class that is preceded by the implicit keyword. 
+For any such class, the compiler generates an implicit conversion from the class's constructor parameter to the class itself.
+
+eg:
+case class Rectangle(width: Int, height: Int)
+
+implicit class RectangleMaker(width: Int) 
+{    
+def x(height: Int) = Rectangle(width, height)  
+}
+
+it causes the following conversion to be automatically generated:
+// Automatically generated  
+implicit def RectangleMaker(width: Int) =
+  new RectangleMaker(width)
+ 
+so 
+val myRectangle = 3 x 4    
+myRectangle: Rectangle = Rectangle(3,4)
+
+Implicit parameters:
+
+The compiler will sometimes replace someCall(a) with someCall(a)(b), or new SomeClass(a) with new SomeClass(a)(b), 
+thereby adding a missing parameter list to complete a function call. 
+
+eg:
+class PreferredPrompt(val preference: String)
+
+object Greeter {    
+def greet(name: String)(implicit prompt: PreferredPrompt) = 
+{      
+println("Welcome, " + name + ". The system is ready.")      
+println(prompt.preference)    
+}  
+}
+
+The last parameter list is marked implicit, which means it can be supplied implicitly. 
+But you can still provide the prompt explicitly, like this:
+  scala> val bobsPrompt = new PreferredPrompt("relax> ") 
+ Greeter.greet("Bob")(bobsPrompt) 
+
+To let the compiler supply the parameter implicitly, you must first define a variable of the expected type, 
+which in this case is PreferredPrompt. 
+You could do this, for example, in a preferences object:
+ object JoesPrefs {    
+ implicit val prompt = new PreferredPrompt("Yes, master> ")  
+ }
+
+import JoesPrefs._           
+import JoesPrefs._    
+scala> Greeter.greet("Joe")  
+Welcome, Joe. The system is ready.  
+Yes, master> 
+
+ when you use implicit on a parameter, not only will the compiler try to supply that parameter with an implicit 
+value, but the compiler will also use that parameter as an available implicit in the body of the method! 
+
+Scala 2.8 loosened this rule. //when more than one implicit conversion there 
+If one of the available conversions is strictly more specific than the others, then the compiler will choose the more specific one. 
+The idea is that whenever there is a reason to believe a programmer would always choose one of the conversions over the others, 
+don't require the programmer to write it explicitly. 
+After all, method overloading has the same relaxation. 
+Continuing the previous example, if one of the available foo methods takes a String while the other takes an Any, 
+then choose the String version. 
+It's clearly more specific. 
+To be more precise, one implicit conversion is more specific than another if one of the following applies: 
+• The argument type of the former is a subtype of the latter's. 
+• Both conversions are methods, and the enclosing class of the former extends the enclosing class of the latter. 
+
+Debug implicits:
+
+Sometimes you might wonder why the compiler did not find an implicit conversion that you think should apply. 
+In that case it helps to write the conversion out explicitly. 
+If that also gives an error message, you then know why the compiler could not apply your implicit. 
+
+scalac -Xprint:typer mocha.scala will also help
+
+Conclusion:
+ Thus, before adding a new implicit conversion, first ask whether you can achieve a similar effect through other means, 
+ such as inheritance, mixin composition, or method overloading. 
+ If all of these fail, however, and you feel like a lot of your code is still tedious and redundant, 
+ then implicits might just be able to help you out.
